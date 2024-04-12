@@ -385,6 +385,13 @@ dynamic_array_to_yaml_impl(
       reinterpret_cast<const uint8_t *>(&(vn->data()[ii])),
       array_node);
   }
+
+  if constexpr (std::is_arithmetic<T>::value ) {
+    if (vn->empty()){
+      array_node = *vn;
+      array_node.SetStyle(YAML::EmitterStyle::Flow);
+    }
+  }
 }
 // Custom version for std::vector<bool> because its implementation is different
 // https://en.cppreference.com/w/cpp/container/vector_bool
