@@ -386,12 +386,12 @@ dynamic_array_to_yaml_impl(
       array_node);
   }
 
-  if constexpr (std::is_arithmetic<T>::value ) {
-    if (vn->empty()){
-      array_node = *vn;
-      array_node.SetStyle(YAML::EmitterStyle::Flow);
-    }
+  // Assign an empty array instead of null
+  if (vn->empty()){
+    array_node = YAML::Node(YAML::NodeType::Sequence);
+    array_node.SetStyle(YAML::EmitterStyle::Flow);
   }
+
 }
 // Custom version for std::vector<bool> because its implementation is different
 // https://en.cppreference.com/w/cpp/container/vector_bool
@@ -535,6 +535,12 @@ dynamic_array_to_yaml(
       element_count = dynmsg::get_vector_size(member_data, element_size);
       DYNMSG_DEBUG(std::cout << "\telement_size=" << element_size << std::endl);
       DYNMSG_DEBUG(std::cout << "\telement_count=" << element_count << std::endl);
+      if (element_count == 0ul)
+      {
+        array_node = YAML::Node(YAML::NodeType::Sequence);
+        array_node.SetStyle(YAML::EmitterStyle::Flow);
+        break;
+      }
       for (size_t ii = 0; ii < element_count; ++ii) {
         nested_member.data = element_data + ii * element_size;
         // Recursively read the nested type into the array element in the YAML representation
